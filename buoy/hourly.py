@@ -1,19 +1,19 @@
 import re
 from enum import Enum
-from urllib.request import urlopen, Request
+from urllib.request import urlopen
 
 from buoy.data import BuoyData
 
 
 class BuoyHourly(BuoyData):
-    def __init__(self, id: str, start_hour: int = 0, end_hour: int = 23):
-        super().__init__(id)
+    def __init__(self, sid: str, start_hour: int = 0, end_hour: int = 23):
+        super().__init__(sid)
 
         self.observations = []
         self.files = []
         self.data = []
 
-        self.id = id
+        self.id = sid
 
         self.hour_from = start_hour
         self.hour_to = end_hour
@@ -31,7 +31,7 @@ class BuoyHourly(BuoyData):
             with urlopen(url, None, 30) as u:
                 content: str = u.read().decode('utf8').strip()
                 lines = re.split(r"[\r\n]+", content)
-                
+
                 for line in lines:
                     if not line.startswith('#') and line != "":  # skip, empty, header, and comment lines
                         stn_id = line[0:7]
@@ -46,14 +46,12 @@ class BuoyHourly(BuoyData):
                         if stn_id == self.id:
                             # only get rows that include this station's ID
                             # line = line.replace_all(r" +", "|", 19)
-                            line = re.sub(r"\s+", '|', line)
+                            line = re.sub(r"\s+", '|', line, 20)
                             obs = line.split('|')
                             self.data.append(obs)
 
-
-
-    def get_data(self):
-        pass
+    def get_observations(self):
+        return self.observations
 
     def set_time_ranges(self):
         if self.hour_from >= self.hour_to:
@@ -76,8 +74,19 @@ class BuoyHourly(BuoyData):
     def set_observations(self):
         [self.observations.append(self.observation(i)) for i in self.data]
 
+    '''
+    map each row's list of column's values to a dictionary
+    that is modeled after the text's schema
+    more details: https://www.ndbc.noaa.gov/faq/measdes.shtml
+    '''
     def observation(self, d):
-        pass
+        obs_data = []
+        [
+            obs_data.append((ObservationFieldMap(i).name, v))
+            for i, v in enumerate(d)
+        ]
+
+        return dict(obs_data)
 
 
 class ObservationFieldMap(Enum):
@@ -87,18 +96,17 @@ class ObservationFieldMap(Enum):
     day = 3
     hour = 4
     min = 5
-    timestamp = 6
-    wind_direction = 7
-    wind_speed = 8
-    gusts = 9
-    wave_height = 10
-    dominant_wave_period = 11
-    avg_wave_period = 12
-    mean_wave_direction = 13
-    barometer = 14
-    air_temp = 15
-    water_temp = 16
-    dewpoint = 17
-    visibility = 18
-    pressure_tendency = 19
-    tide = 20
+    wind_direction = 6
+    wind_speed = 7
+    gusts = 8
+    wave_height = 9
+    dominant_wave_period = 10
+    avg_wave_period = 11
+    mean_wave_direction = 12
+    barometer = 13
+    air_temp = 14
+    water_temp = 15
+    dewpoint = 16
+    visibility = 17
+    pressure_tendency = 18
+    tide = 19
