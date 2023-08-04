@@ -7,5 +7,5 @@
 usage:
 
 ```shell
-buoys hourly &lt;station ID&gt; &lt;starting hour&gt; &lt;ending hour&gt;
+buoys hourly `station ID` `starting hour` `ending hour`
 ```
