@@ -6,4 +6,3 @@ class BuoyData:
         self.data_path = 'https://www.ndbc.noaa.gov/data/'
         self.id = id
         self.station = Station(self.id)
-        

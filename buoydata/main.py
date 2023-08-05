@@ -1,5 +1,4 @@
 import sys
-
 from buoy.hourly import BuoyHourly
 
 
@@ -16,6 +15,9 @@ def hourly_cmd(args):
         exit(-1)
     except TypeError as e:
         print('start and end hours must be integer values')
+        exit(-1)
+    except IndexError as e:
+        print('please provide station ID and start and end hours')
         exit(-1)
 
 
@@ -38,6 +40,3 @@ def do_cmd(args):
 def boot_up():
     args = sys.argv[1:]
     do_cmd(args)
-
-    # bh = BuoyHourly('44018', 9, 12)
-    # print(bh.get_observations())
