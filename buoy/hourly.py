@@ -1,14 +1,11 @@
 import re
-from enum import Enum
 from urllib.request import urlopen
 
-from buoy.data import BuoyData
+from buoy import constants
 
 
-class BuoyHourly(BuoyData):
+class BuoyHourly:
     def __init__(self, sid: str, start_hour: int = 0, end_hour: int = 23):
-        super().__init__(sid)
-
         self.observations = []
         self.files = []
         self.data = []
@@ -67,7 +64,7 @@ class BuoyHourly(BuoyData):
 
     def set_files(self):
         [
-            self.files.append(self.data_path + 'hourly2/hour_' + "%02d" % i + '.txt')
+            self.files.append(constants.NBDC_ROOT_URL + 'hourly2/hour_' + "%02d" % i + '.txt')
             for i in range(self.hour_from, self.hour_to)
         ]
 
@@ -79,34 +76,9 @@ class BuoyHourly(BuoyData):
     that is modeled after the text's schema
     more details: https://www.ndbc.noaa.gov/faq/measdes.shtml
     '''
-    def observation(self, d):
+
+    def observation(self, d: list):
         obs_data = []
-        [
-            obs_data.append((ObservationFieldMap(i).name, v))
-            for i, v in enumerate(d)
-        ]
+        [obs_data.append((constants.ObservationFieldMap(i).name, v)) for i, v in enumerate(d)]
 
         return dict(obs_data)
-
-
-class ObservationFieldMap(Enum):
-    id = 0
-    year = 1
-    month = 2
-    day = 3
-    hour = 4
-    min = 5
-    wind_direction = 6
-    wind_speed = 7
-    gusts = 8
-    wave_height = 9
-    dominant_wave_period = 10
-    avg_wave_period = 11
-    mean_wave_direction = 12
-    barometer = 13
-    air_temp = 14
-    water_temp = 15
-    dewpoint = 16
-    visibility = 17
-    pressure_tendency = 18
-    tide = 19

@@ -1,3 +1,4 @@
+import json
 import sys
 from buoy.hourly import BuoyHourly
 from buoy.station import station_sync
@@ -10,7 +11,7 @@ def hourly_cmd(args):
         end = int(args[2].strip())
 
         bh = BuoyHourly(id, start, end)
-        print(bh.get_observations())
+        print(json.dumps(bh.get_observations(), sort_keys=True, indent=4))
     except ValueError as e:
         print('start and end hours must be integer values')
         exit(-1)

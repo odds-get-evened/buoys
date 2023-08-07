@@ -1,6 +1,5 @@
 import os.path
 import time
-from datetime import datetime
 from hashlib import sha256
 from pathlib import Path
 from urllib.request import urlopen
