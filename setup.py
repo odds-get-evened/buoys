@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="buoydata",
+    name="buoys",
     author="Chris Walsh",
     author_email="chris.is.rad@pm.me",
     classifiers=[],

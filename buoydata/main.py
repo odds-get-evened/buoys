@@ -1,5 +1,6 @@
 import sys
 from buoy.hourly import BuoyHourly
+from buoy.station import station_sync
 
 
 def hourly_cmd(args):
@@ -21,6 +22,10 @@ def hourly_cmd(args):
         exit(-1)
 
 
+def station_cmd(the_rest):
+    pass
+
+
 def do_cmd(args):
     if len(args) == 0:
         print("please choose a command")
@@ -32,11 +37,16 @@ def do_cmd(args):
     match the_cmd:
         case 'hourly':  # needs station ID, start, and end
             hourly_cmd(the_rest)
+        case 'station':
+            station_cmd(the_rest)
         case _:
             print('not a valid command')
             exit(-1)
 
 
 def boot_up():
+    # sync station list from remote URL
+    station_sync()
+    # run main program
     args = sys.argv[1:]
     do_cmd(args)
