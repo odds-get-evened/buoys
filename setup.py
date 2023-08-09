@@ -10,7 +10,9 @@ setup(
     version="0.0.1",
     url="",
     packages=find_packages(),
-    install_requires=[],
+    install_requires=[
+        'tinydb'
+    ],
     entry_points={
         'console_scripts': [
             'buoys = buoydata.main:boot_up'

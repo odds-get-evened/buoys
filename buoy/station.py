@@ -1,10 +1,45 @@
+import json
 import os.path
+import threading
 import time
 from hashlib import sha256
 from pathlib import Path
 from urllib.request import urlopen
 
+from tinydb import TinyDB
+from tinydb.table import Document
+
+from buoy import constants
+
 STATIONS_TBL_URL = 'https://www.ndbc.noaa.gov/data/stations/station_table.txt'
+
+DB_FILE = Path(os.path.expanduser('~'), '.buoys', 'stations.json')
+DB = TinyDB(DB_FILE)
+
+
+def save_station(items):
+    d = []
+
+    [d.append((constants.StationFieldMap(i).name, v)) for i, v in enumerate(items)]
+
+    j = dict(d)
+    j_str = json.dumps(j)
+
+    DB.insert(j)
+
+
+def sync_station_data(path):
+    if not path.exists():
+        station_sync()
+
+    if not DB_FILE.exists():
+        DB_FILE.parent.mkdir(parents=True, exist_ok=True)
+        DB_FILE.touch()
+
+    DB.truncate()
+
+    with path.open('r') as f:
+        [save_station(line.split('|')) for line in f.readlines() if not line.startswith('#')]
 
 
 def station_sync():
@@ -35,6 +70,8 @@ def station_sync():
                 lf.close()
 
         print("updated stations table data. saved to " + local_file.name)
+        sync_station_data(local_file)
+
 
 
 class Station:

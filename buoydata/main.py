@@ -1,5 +1,7 @@
 import json
 import sys
+import threading
+
 from buoy.hourly import BuoyHourly
 from buoy.station import station_sync
 
@@ -23,11 +25,9 @@ def hourly_cmd(args):
         exit(-1)
 
 
-def station_cmd(the_rest):
-    pass
-
-
 def do_cmd(args):
+    station_sync()  # grab new station list from remote text file
+
     if len(args) == 0:
         print("please choose a command")
         exit(-1)
@@ -39,7 +39,7 @@ def do_cmd(args):
         case 'hourly':  # needs station ID, start, and end
             hourly_cmd(the_rest)
         case 'station':
-            station_cmd(the_rest)
+            pass
         case _:
             print('not a valid command')
             exit(-1)
@@ -47,7 +47,9 @@ def do_cmd(args):
 
 def boot_up():
     # sync station list from remote URL
-    station_sync()
+    stn_sync_t = threading.Thread(target=station_sync)
+    stn_sync_t.start()
+
     # run main program
-    args = sys.argv[1:]
-    do_cmd(args)
+    a = sys.argv[1:]
+    do_cmd(a)

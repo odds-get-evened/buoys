@@ -24,3 +24,16 @@ class ObservationFieldMap(Enum):
     visibility = 17
     pressure_tendency = 18
     tide = 19
+
+
+class StationFieldMap(Enum):
+    id = 0
+    owner = 1
+    ttype = 2
+    hull = 3
+    name = 4
+    paylod = 5
+    location = 6
+    timezone = 7
+    forcast = 8
+    note = 9
