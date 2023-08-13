@@ -73,7 +73,6 @@ def station_sync():
         sync_station_data(local_file)
 
 
-
 class Station:
     def __init__(self, id: str):
         self.id = id

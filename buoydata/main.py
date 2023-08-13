@@ -25,6 +25,24 @@ def hourly_cmd(args):
         exit(-1)
 
 
+def station_cmd(args):
+    try:
+        task = args[0].strip()
+        print(task)
+
+        if task == 'find':
+            try:
+                q = " ".join(args[1:])
+                print(q)
+            except IndexError as ie:
+                print('find task requires a location query')
+                exit(-1)
+
+            print(q)
+    except IndexError as ie:
+        print('please provide a task (e.g. `find`)')
+        exit(-1)
+
 def do_cmd(args):
     station_sync()  # grab new station list from remote text file
 
@@ -39,7 +57,7 @@ def do_cmd(args):
         case 'hourly':  # needs station ID, start, and end
             hourly_cmd(the_rest)
         case 'station':
-            pass
+            station_cmd(the_rest)
         case _:
             print('not a valid command')
             exit(-1)
@@ -48,7 +66,7 @@ def do_cmd(args):
 def boot_up():
     # sync station list from remote URL
     stn_sync_t = threading.Thread(target=station_sync)
-    stn_sync_t.start()
+    stn_sync_t.run()
 
     # run main program
     a = sys.argv[1:]
