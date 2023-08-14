@@ -13,8 +13,8 @@ from buoy import constants
 
 STATIONS_TBL_URL = 'https://www.ndbc.noaa.gov/data/stations/station_table.txt'
 
-DB_FILE = Path(os.path.expanduser('~'), '.buoys', 'stations.json')
-DB = TinyDB(DB_FILE)
+STN_DB_FILE = Path(os.path.expanduser('~'), '.buoys', 'stations.json')
+STN_DB = TinyDB(STN_DB_FILE)
 
 
 def save_station(items):
@@ -25,18 +25,18 @@ def save_station(items):
     j = dict(d)
     j_str = json.dumps(j)
 
-    DB.insert(j)
+    STN_DB.insert(j)
 
 
 def sync_station_data(path):
     if not path.exists():
         station_sync()
 
-    if not DB_FILE.exists():
-        DB_FILE.parent.mkdir(parents=True, exist_ok=True)
-        DB_FILE.touch()
+    if not STN_DB_FILE.exists():
+        STN_DB_FILE.parent.mkdir(parents=True, exist_ok=True)
+        STN_DB_FILE.touch()
 
-    DB.truncate()
+    STN_DB.truncate()
 
     with path.open('r') as f:
         [save_station(line.split('|')) for line in f.readlines() if not line.startswith('#')]

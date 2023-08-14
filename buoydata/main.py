@@ -3,7 +3,8 @@ import sys
 import threading
 
 from buoy.hourly import BuoyHourly
-from buoy.station import station_sync
+from buoy.station import station_sync, STN_DB
+from geoquery.geode import get_nearby_coordinates, get_lat_long
 
 
 def hourly_cmd(args):
@@ -13,12 +14,9 @@ def hourly_cmd(args):
         end = int(args[2].strip())
 
         bh = BuoyHourly(id, start, end)
-        print(json.dumps(bh.get_observations(), sort_keys=True, indent=4))
+        print(json.dumps(bh.get_observations(), sort_keys=False, indent=4))
     except ValueError as e:
-        print('start and end hours must be integer values')
-        exit(-1)
-    except TypeError as e:
-        print('start and end hours must be integer values')
+        print('start and end hours must be integer values. value error.')
         exit(-1)
     except IndexError as e:
         print('please provide station ID and start and end hours')
@@ -33,15 +31,19 @@ def station_cmd(args):
         if task == 'find':
             try:
                 q = " ".join(args[1:])
-                print(q)
+                coords = get_lat_long(q)
+                print(coords)
             except IndexError as ie:
                 print('find task requires a location query')
                 exit(-1)
 
-            print(q)
+        if task == 'list':
+            print("%10s%64s" % ('id', 'name'))
+            [print("%10s%64s" % (i['id'], i['name'])) for i in STN_DB.all()]
     except IndexError as ie:
         print('please provide a task (e.g. `find`)')
         exit(-1)
+
 
 def do_cmd(args):
     station_sync()  # grab new station list from remote text file

@@ -1,7 +1,10 @@
+import datetime
 import re
+import zoneinfo
 from urllib.request import urlopen
 
 from buoy import constants
+from buoy.constants import ObservationFieldMap
 
 
 class BuoyHourly:
@@ -79,6 +82,59 @@ class BuoyHourly:
 
     def observation(self, d: list):
         obs_data = []
-        [obs_data.append((constants.ObservationFieldMap(i).name, v)) for i, v in enumerate(d)]
+        [obs_data.append((ObservationFieldMap(i).name, v)) for i, v in enumerate(d)]
 
-        return dict(obs_data)
+        obs_data = [self.corrections(j) for j in obs_data]
+
+        # roll up dates and times into one datetime field
+        dt = datetime.datetime(
+            obs_data[ObservationFieldMap.year.value][1],
+            obs_data[ObservationFieldMap.month.value][1],
+            obs_data[ObservationFieldMap.day.value][1],
+            hour=obs_data[ObservationFieldMap.hour.value][1],
+            minute=obs_data[ObservationFieldMap.min.value][1]
+        ).astimezone(datetime.timezone.utc).timestamp()
+        obs_data.append(('timestamp', dt))
+
+        od = dict(obs_data)
+
+        # remove all the time fields from dict
+        od.pop(ObservationFieldMap.year.name)
+        od.pop(ObservationFieldMap.month.name)
+        od.pop(ObservationFieldMap.day.name)
+        od.pop(ObservationFieldMap.hour.name)
+        od.pop(ObservationFieldMap.min.name)
+
+        return od
+
+    def corrections(self, obs: tuple) -> tuple:
+        """
+        since all values are returned as strings this gets all data
+        into appropriate types
+        :param obs:
+        :return:
+        """
+        key = obs[0]
+        val = obs[1]
+
+        dont_touch = ['id']
+
+        # let's convert all numeric strings to integers
+        if key not in dont_touch:
+            if val.isdigit():
+                val = int(val)
+            else:
+                # convert decimal values to floats
+                try:
+                    float(val)
+                    val = float(val)
+                except ValueError as e:
+                    pass
+
+        try:
+            if val.lower() == 'mm':
+                val = ''
+        except AttributeError as e:
+            pass
+
+        return key, val
