@@ -4,10 +4,11 @@ import threading
 
 from buoy.hourly import BuoyHourly
 from buoy.station import station_sync, STN_DB
-from geoquery.geode import get_nearby_coordinates, get_lat_long
+from buoy.ui.window import BuoyWindow
+from geoquery.geode import get_lat_long
 
 
-def hourly_cmd(args):
+def hourly_cmd(args: list[str]):
     try:
         id = args[0].strip()
         start = int(args[1].strip())
@@ -23,7 +24,11 @@ def hourly_cmd(args):
         exit(-1)
 
 
-def station_cmd(args):
+def station_cmd(args: list[str]):
+    """
+    all the console commands for buoys application
+    :param args: tuple of args from system
+    """
     try:
         task = args[0].strip()
         print(task)
@@ -45,11 +50,15 @@ def station_cmd(args):
         exit(-1)
 
 
-def do_cmd(args):
+def open_gui():
+    BuoyWindow()
+
+
+def do_cmd(args: list[str]):
     station_sync()  # grab new station list from remote text file
 
     if len(args) == 0:
-        print("please choose a command")
+        print("please choose a command (hourly, station)")
         exit(-1)
 
     the_cmd = args[0]
@@ -60,6 +69,8 @@ def do_cmd(args):
             hourly_cmd(the_rest)
         case 'station':
             station_cmd(the_rest)
+        case 'gui':
+            open_gui()
         case _:
             print('not a valid command')
             exit(-1)

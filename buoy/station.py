@@ -1,5 +1,6 @@
 import json
 import os.path
+import re
 import threading
 import time
 from hashlib import sha256
@@ -17,10 +18,22 @@ STN_DB_FILE = Path(os.path.expanduser('~'), '.buoys', 'stations.json')
 STN_DB = TinyDB(STN_DB_FILE)
 
 
+def correction(r):
+    key = r[0]
+    val = r[1]
+
+    if key == 'location':
+        print(val)
+
+
+
 def save_station(items):
     d = []
 
     [d.append((constants.StationFieldMap(i).name, v)) for i, v in enumerate(items)]
+
+    # normalize lat/long (location)
+    d = [correction(j) for j in d]
 
     j = dict(d)
     j_str = json.dumps(j)

@@ -1,6 +1,5 @@
 import datetime
 import re
-import zoneinfo
 from urllib.request import urlopen
 
 from buoy import constants
