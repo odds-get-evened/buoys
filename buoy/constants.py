@@ -32,7 +32,7 @@ class StationFieldMap(Enum):
     ttype = 2
     hull = 3
     name = 4
-    paylod = 5
+    payload = 5
     location = 6
     timezone = 7
     forcast = 8

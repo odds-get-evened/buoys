@@ -1,22 +1,24 @@
 import json
+import re
 import sys
 import threading
 
+from buoy.constants import StationFieldMap
 from buoy.hourly import BuoyHourly
-from buoy.station import station_sync, STN_DB
+from buoy.station import station_sync, STN_DB, LOCAL_STATIONS_TXT
 from buoy.ui.window import BuoyWindow
 from geoquery.geode import get_lat_long
 
 
 def hourly_cmd(args: list[str]):
     try:
-        id = args[0].strip()
+        _id = args[0].strip()
         start = int(args[1].strip())
         end = int(args[2].strip())
 
-        bh = BuoyHourly(id, start, end)
+        bh = BuoyHourly(_id, start, end)
         print(json.dumps(bh.get_observations(), sort_keys=False, indent=4))
-    except ValueError as e:
+    except ValueError:
         print('start and end hours must be integer values. value error.')
         exit(-1)
     except IndexError as e:
@@ -31,7 +33,6 @@ def station_cmd(args: list[str]):
     """
     try:
         task = args[0].strip()
-        print(task)
 
         if task == 'find':
             try:
@@ -42,11 +43,16 @@ def station_cmd(args: list[str]):
                 print('find task requires a location query')
                 exit(-1)
 
+        if task == 'sync':
+            station_sync(force=True)
+            print("station data sync has completed.")
+
         if task == 'list':
-            print("%10s%64s" % ('id', 'name'))
-            [print("%10s%64s" % (i['id'], i['name'])) for i in STN_DB.all()]
-    except IndexError as ie:
-        print('please provide a task (e.g. `find`)')
+            print("%s%40s" % ('ID', 'name (partial)'))
+            [print("%s%40s" % (stn[StationFieldMap.id.name], stn[StationFieldMap.name.name][0:35])) for stn in STN_DB.all()]
+
+    except IndexError:
+        print('please provide a task (e.g. `find`, `list`)')
         exit(-1)
 
 
@@ -55,8 +61,6 @@ def open_gui():
 
 
 def do_cmd(args: list[str]):
-    station_sync()  # grab new station list from remote text file
-
     if len(args) == 0:
         print("please choose a command (hourly, station)")
         exit(-1)
