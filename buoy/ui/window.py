@@ -1,7 +1,7 @@
 import os
 import tkinter as tk
-from tkinter import BOTH, ON, HORIZONTAL, X, E, W, EW
-from tkinter.ttk import Notebook
+from tkinter import BOTH, EW, LEFT, VERTICAL, RIGHT, Y
+from tkinter.ttk import Notebook, Treeview
 
 from buoy.hourly import BuoyHourly
 
@@ -91,14 +91,29 @@ class BuoyWindow:
 
         get_obs_btn = tk.Button(self.main_nb_tab1, text='get observations')
         get_obs_btn.grid(row=3, column=0, columnspan=2, sticky='ew')
-        get_obs_btn.bind('<ButtonRelease-1>', self.get_observations)
+        get_obs_btn.bind('<ButtonRelease-1>', self.get_observations_evt)
+
+        obs_panel = tk.Frame(self.main_nb_tab1)
+        obs_panel.grid(row=4, column=0, sticky='ew')
+
+        obs_tree = Treeview(obs_panel, selectmode='browse')
+        obs_tree.pack(expand=True, fill=BOTH, side=LEFT)
+        obs_tree['show'] = 'headings'
+        obs_tree['columns'] = (1, 2)
+        obs_tree.heading(1, text='time')
+        obs_tree.heading(2, text='station ID')
+        obs_tree.bind('<ButtonRelease-1>', None)
+
+        obs_tree_scroll = tk.Scrollbar(obs_panel, orient=VERTICAL, command=obs_tree.yview)
+        obs_tree.configure(yscrollcommand=obs_tree_scroll.set)
+        obs_tree_scroll.pack(side=RIGHT, expand=False, fill=Y)
 
         self.main_frame.pack(expand=True, fill=BOTH)
 
     def post_build(self):
         pass
 
-    def get_observations(self, evt):
+    def get_observations_evt(self, evt):
         print(f"station ID: {self.stn_id_sv.get()}")
         stn_id = self.stn_id_sv.get()
         start_hr = self.start_hr_sv.get()
@@ -108,4 +123,3 @@ class BuoyWindow:
 
         obs = self.buoys_hourly.get_observations()
         [print(i) for i in obs]
-
