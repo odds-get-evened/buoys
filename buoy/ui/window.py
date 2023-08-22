@@ -1,6 +1,7 @@
+import datetime
 import os
 import tkinter as tk
-from tkinter import BOTH, EW, LEFT, VERTICAL, RIGHT, Y
+from tkinter import BOTH, EW, LEFT, VERTICAL, RIGHT, Y, END, HORIZONTAL, BOTTOM, X
 from tkinter.ttk import Notebook, Treeview
 
 from buoy.hourly import BuoyHourly
@@ -9,6 +10,7 @@ from buoy.hourly import BuoyHourly
 class BuoyWindow:
     def __init__(self, p=None):
         # hourly instance to grab the datas
+        self.obs_tree = None
         self.buoys_hourly = None
 
         # add all Tk component fields
@@ -94,19 +96,23 @@ class BuoyWindow:
         get_obs_btn.bind('<ButtonRelease-1>', self.get_observations_evt)
 
         obs_panel = tk.Frame(self.main_nb_tab1)
-        obs_panel.grid(row=4, column=0, sticky='ew')
+        obs_panel.grid(row=4, column=0, sticky='ew', columnspan=2)
 
-        obs_tree = Treeview(obs_panel, selectmode='browse')
-        obs_tree.pack(expand=True, fill=BOTH, side=LEFT)
-        obs_tree['show'] = 'headings'
-        obs_tree['columns'] = (1, 2)
-        obs_tree.heading(1, text='time')
-        obs_tree.heading(2, text='station ID')
-        obs_tree.bind('<ButtonRelease-1>', None)
+        self.obs_tree = Treeview(obs_panel, selectmode='browse')
+        self.obs_tree.pack(expand=True, fill=BOTH, side=LEFT)
+        self.obs_tree['show'] = 'headings'
+        self.obs_tree['columns'] = (1, 2, 3, 4)
+        self.obs_tree.heading(1, text='station')
+        self.obs_tree.heading(2, text='time')
+        self.obs_tree.heading(3, text='wind dir.')
+        self.obs_tree.heading(4, text='wind speed')
+        self.obs_tree.bind('<ButtonRelease-1>', None)
 
-        obs_tree_scroll = tk.Scrollbar(obs_panel, orient=VERTICAL, command=obs_tree.yview)
-        obs_tree.configure(yscrollcommand=obs_tree_scroll.set)
-        obs_tree_scroll.pack(side=RIGHT, expand=False, fill=Y)
+        obs_tree_vscroll = tk.Scrollbar(obs_panel, orient=VERTICAL, command=self.obs_tree.yview)
+        obs_tree_hscroll =tk.Scrollbar(obs_panel, orient=HORIZONTAL, command=self.obs_tree.xview)
+        self.obs_tree.configure(yscrollcommand=obs_tree_vscroll.set)
+        obs_tree_vscroll.pack(side=RIGHT, expand=False, fill=Y)
+        obs_tree_hscroll.pack(side=BOTTOM, fill=X)
 
         self.main_frame.pack(expand=True, fill=BOTH)
 
@@ -114,7 +120,8 @@ class BuoyWindow:
         pass
 
     def get_observations_evt(self, evt):
-        print(f"station ID: {self.stn_id_sv.get()}")
+        [self.obs_tree.delete(o) for o in self.obs_tree.get_children()]
+        # print(f"station ID: {self.stn_id_sv.get()}")
         stn_id = self.stn_id_sv.get()
         start_hr = self.start_hr_sv.get()
         end_hr = self.end_hr_sv.get()
@@ -122,4 +129,9 @@ class BuoyWindow:
         self.buoys_hourly = BuoyHourly(stn_id, start_hr, end_hr)
 
         obs = self.buoys_hourly.get_observations()
-        [print(i) for i in obs]
+        [self.obs_tree.insert('', END, values=(
+            o['id'],
+            datetime.datetime.fromtimestamp(o['timestamp']).strftime("%c"),
+            o['wind_direction'],
+            o['wind_speed']
+        )) for o in obs]

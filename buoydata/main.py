@@ -1,11 +1,10 @@
 import json
-import re
 import sys
 import threading
 
 from buoy.constants import StationFieldMap
 from buoy.hourly import BuoyHourly
-from buoy.station import station_sync, STN_DB, LOCAL_STATIONS_TXT
+from buoy.station import station_sync, STN_DB
 from buoy.ui.window import BuoyWindow
 from geoquery.geode import get_lat_long
 
@@ -83,7 +82,7 @@ def do_cmd(args: list[str]):
 def boot_up():
     # sync station list from remote URL
     stn_sync_t = threading.Thread(target=station_sync)
-    stn_sync_t.run()
+    stn_sync_t.start()
 
     # run main program
     a = sys.argv[1:]
