@@ -35,9 +35,9 @@ class BuoyHourly:
                     if not line.startswith('#') and line != "":  # skip, empty, header, and comment lines
                         stn_id = line[0:7]
                         '''
-                        if station ID has a space in it, it's invalid
-                        we've the string end into the next column, and this means
-                        IDs are allotted 7 characters from the old 5
+                        if station ID has a space in it, it's invalid,
+                        and put  the string end into the next column, and 
+                        this means IDs are allotted 7 characters from the old 5
                         '''
                         if ' ' in stn_id:
                             stn_id = line[0:5]
@@ -53,21 +53,19 @@ class BuoyHourly:
         return self.observations
 
     def set_time_ranges(self):
-        if self.hour_from >= self.hour_to:
-            print("start time must be less than and not equal to end time.")
-            exit(-1)
-        else:
-            '''
-            current hour is not recorded/posted yet
-            so we offset both hours by one
-            '''
-            self.hour_from = (self.hour_from - 1)
-            self.hour_to = (self.hour_to - 1)
+        self.hour_from = (self.hour_from - 1)
+        self.hour_from = ((self.hour_from - 0) + 0) % (23 - 0 + 1)  # ensure the number is with 24 hour range
+        self.hour_to = (self.hour_to - 1)
+        ''' this formula is for `wrapping` or a `circular range` '''
+        self.hour_to = ((self.hour_to - 0) + 0) % (23 - 0 + 1)
 
     def set_files(self):
+        a = self.hour_from
+        b = self.hour_to
+
         [
             self.files.append(constants.NBDC_ROOT_URL + 'hourly2/hour_' + "%02d" % i + '.txt')
-            for i in range(self.hour_from, self.hour_to)
+            for i in range((a if a < b else b), (b if b > a else a))
         ]
 
     def set_observations(self):

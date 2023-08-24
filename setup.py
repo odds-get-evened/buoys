@@ -11,7 +11,7 @@ setup(
     url="",
     packages=find_packages(),
     install_requires=[
-        'tinydb'
+        'tinydb', 'matplotlib', 'numpy'
     ],
     entry_points={
         'console_scripts': [
