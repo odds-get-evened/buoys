@@ -1,13 +1,12 @@
 import json
 import os.path
-from itertools import chain
+import pandas as pd
 from pathlib import Path
 
-import numpy as np
 import matplotlib.pyplot as plt
 from tinydb import Query
 
-from buoy.constants import StationFieldMap as stn_map, ObservationFieldMap as obs_map
+from buoy.constants import StationFieldMap as stn_map, ObservationFieldMap as obs_map, ObservationFieldMap
 from buoy.hourly import BuoyHourly
 from buoy.station import STN_DB
 
@@ -71,8 +70,25 @@ def normalize_obs(obs):
     return o
 
 
-def obs_line_chart(obs):
-    print(json.dumps(obs, indent=4))
+def obs_line_chart(obs: list[dict]):
+    # print(json.dumps(obs, indent=4))
+    x = []  # time domain
+    y = []  # water temp. plot
+    a = []  # wave height plot
+    [(
+        x.append(z['timestamp']),
+        y.append(z[ObservationFieldMap.water_temp.name]),
+        a.append(z[ObservationFieldMap.wave_height.name])
+    ) for z in obs]
+
+    ''' pack arrays into dataframes and sort each '''
+    x_df = pd.DataFrame(data=sorted(x))
+    y_df = pd.DataFrame(data=sorted(y))
+    a_df = pd.DataFrame(data=sorted(a))
+
+    fig, axs = plt.subplots()
+    axs.plot(x_df, y_df)
+    plt.show()
 
 
 def main():
